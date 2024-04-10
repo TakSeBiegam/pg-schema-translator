@@ -1,0 +1,13 @@
+type Person{
+	name: String!
+	age: Int!
+	friend: [Person]
+}
+
+type Query{
+	listPersons: [Person]
+}
+
+schema{
+	query: Query
+}

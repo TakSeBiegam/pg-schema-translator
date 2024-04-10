@@ -1,0 +1,4 @@
+CREATE GRAPH TYPE CatalogGraphType STRICT {
+    (CatalogType: Catalog {id INT}),
+    (DataResourceType: DataResource),
+  }

@@ -1,0 +1,11 @@
+type Catalog {
+  id Int
+}
+
+type DataResource
+
+type CatalogGraphType {
+  CatalogType: Catalog
+  DataResourceType: DataResource
+}
+

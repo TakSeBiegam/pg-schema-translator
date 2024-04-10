@@ -1,0 +1,14 @@
+{
+    "resolvers": {
+        "Query.analyseGraphql": {
+            "resolve": {
+                "name": "lib\\Query\\analyseGraphql"
+            }
+        },
+        "Query.listPersons": {
+            "resolve": {
+                "name": "lib\\Query\\listPersons"
+            }
+        }
+    }
+}
