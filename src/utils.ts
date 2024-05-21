@@ -1,55 +1,4 @@
-import { FieldType, Options, Parser, ParserField, TypeDefinition } from 'graphql-js-tree';
-
-const input = `
-type Post{
-  name: String!
-  content: String!
-  createdAt: String!
-  comments: Comment!
-}
-
-type Comment {
-  title: String!
-  isLiked: Likes!
-}
-
-type Likes {
-  Liked: Boolean!
-  Loved: Boolean!
-}
-
-type Query{
-  publicQuery: PublicQuery
-  userQuery: UserQuery
-}
-
-type PublicQuery{
-  version: String!
-}
-
-type User {
-  username: String! @constraint(format: "^[0-9a-zA-Z]*$")
-  nickname: String! @constraint(maxLength: 2137)
-  sex: SEX
-  friends: [String!]!
-}
-
-tysdasdsape UserQuery {
-  me: User!
-  getPost(
-    id: String!
-  ): Post!
-}
-
-enum SEX {
-  M
-  F
-}
-
-schema {
-  query: Query
-}
-`;
+import { FieldType, Options, ParserField, TypeDefinition } from 'graphql-js-tree';
 
 const GqlScalars = ['INT', 'FLOAT', 'STRING', 'BOOLEAN', 'ID'];
 type GqlEnum = {
@@ -58,7 +7,6 @@ type GqlEnum = {
 };
 
 const handleConstraintDirective = (arg: ParserField) => {
-  console.log(arg);
   switch (arg.name) {
     case 'maxLength':
       return `(${arg.value?.value})`;
@@ -72,7 +20,6 @@ const handleConstraintDirective = (arg: ParserField) => {
 };
 
 const convertDirective = (directive: ParserField) => {
-  console.log(directive);
   switch (directive.name) {
     case 'constraint': {
       return handleConstraintDirective(directive.args[0]);
@@ -135,7 +82,7 @@ const checkIfNodeIsObject = (obj: ParserField, nodes: ParserField[]) =>
 const getObjects = (nodes: ParserField[]) =>
   nodes.filter((node) => node.data.type === TypeDefinition.ObjectTypeDefinition);
 
-const CreateGraphWithoutInputs = (nodes: ParserField[]) => {
+export const CreateGraphWithoutInputs = (nodes: ParserField[]) => {
   let result = '';
   let enumArray = getEnums(nodes);
   let objectsArray = getObjects(nodes);
@@ -164,7 +111,7 @@ const CreateGraphWithoutInputs = (nodes: ParserField[]) => {
   return result;
 };
 
-const CreateGraphWithInputs = (nodes: ParserField[]) => {
+export const CreateGraphWithInputs = (nodes: ParserField[]) => {
   return nodes.flatMap((node, i) =>
     node.args.length
       ? node.args
@@ -193,21 +140,3 @@ const CreateGraphWithInputs = (nodes: ParserField[]) => {
       : '',
   );
 };
-
-const convertGraph = (title: string, nodes: ParserField[]) => {
-  return (
-    `CREATE GRAPH TYPE ${title}GraphType STRICT { ` +
-    CreateGraphWithoutInputs(nodes) +
-    CreateGraphWithInputs(nodes) +
-    `\n}`
-  );
-};
-let nodes: ParserField[] = [];
-try {
-  nodes = Parser.parse(input).nodes.filter((node) => node.name !== 'schema');
-} catch (e) {
-  console.error(`your schema is not valid.
-${e}`);
-  throw new Error('not valid schema');
-}
-console.log(convertGraph('schema', nodes));
