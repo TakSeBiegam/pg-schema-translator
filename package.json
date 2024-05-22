@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node ./lib/main.js",
-    "build": "tsc ./src"
+    "build": "tsc"
   },
   "author": "Arkadiusz Oskar Kuryło",
   "license": "ISC",

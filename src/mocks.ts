@@ -33,7 +33,7 @@ export const MockSchema = {
       friends: [String!]!
     }
     
-    tysdasdsape UserQuery {
+    type UserQuery {
       me: User!
       getPost(
         id: String!
