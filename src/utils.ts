@@ -9,10 +9,10 @@ type GqlEnum = {
 const handleConstraintDirective = (arg: ParserField) => {
   switch (arg.name) {
     case 'maxLength':
-      return `(${arg.value?.value})`;
+      return `(${arg.value ? arg.value.value : '<UNKNOWN>'})`;
     case 'format':
     case 'pattern':
-      return ` ${arg.value?.value}`;
+      return ` ${arg.value ? arg.value.value : '<UNKNOWN>'}`;
     default:
       console.error(`NOT HANDLED CONSTRAINT DIRECTIVE ARGUMENT ${arg.name}`);
       break;
