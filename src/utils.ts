@@ -32,6 +32,8 @@ const convertDirective = (directive: ParserField) => {
 const convertScalarsToUpperCase = (input: string): string =>
   GqlScalars.indexOf(input.toUpperCase()) !== -1 ? input.toUpperCase() : input;
 
+const isGqlScalar = (input: string): boolean => GqlScalars.indexOf(input.toUpperCase()) !== -1;
+
 const checkFieldTypeIsScalar = (enumName: string, enumArray: GqlEnum[]) =>
   enumArray.some((enumObj) => enumObj.name === enumName);
 
@@ -87,14 +89,26 @@ export const CreateGraphWithoutInputs = (nodes: ParserField[]) => {
   let enumArray = getEnums(nodes);
   let objectsArray = getObjects(nodes);
   for (let index = 0; index < nodes.length; index++) {
+    let nestedObjects: string[] = [];
     const node = nodes[index];
     if (node.type.fieldType.type === Options.name && node.type.fieldType.name === 'enum') continue;
     result += node.args.every((arg) => arg && arg.args && arg.args.length > 0)
       ? ''
-      : `\n  (${node.name}: ${node.name} {` +
+      : `\n  (${node.name}Type: ${node.name}Type {` +
         node.args.map((arg) => {
           const isRequired = arg.type.fieldType.type === Options.required;
           const isNested = checkIfNodeIsObject(arg, objectsArray);
+          if (
+            arg.type.fieldType.type === Options.required &&
+            arg.type.fieldType.nest.type === Options.name &&
+            !isGqlScalar(arg.type.fieldType.nest.name)
+          ) {
+            nestedObjects.push(
+              `(:${node.name}Type)-[${arg.type.fieldType.nest.name}Type: ${arg.type.fieldType.nest.name}]->(:${arg.type.fieldType.nest.name}Type) `,
+            );
+            return ``;
+          }
+
           const curArg =
             arg.type.fieldType.type === Options.name
               ? convertToEnumOrScalar(arg.type.fieldType, enumArray)
@@ -107,6 +121,7 @@ export const CreateGraphWithoutInputs = (nodes: ParserField[]) => {
           return `${isRequired ? '' : ' OPTIONAL'} ${isNested ? curArg : arg.name + ' ' + curArg}${!!dir ? dir : ''}`;
         }) +
         ` }),`;
+    result += nestedObjects.map((no) => `\n  ${no}`);
   }
   return result;
 };
@@ -123,7 +138,7 @@ export const CreateGraphWithInputs = (nodes: ParserField[]) => {
                   : arg.type.fieldType.nest.type === Options.name
                   ? convertScalarsToUpperCase(arg.type.fieldType.nest.name)
                   : '<UNKNOWN>';
-              return `\n  (:${node.name})-[${arg.args.flatMap(
+              return `\n  (:${node.name}Type)-[${arg.args.flatMap(
                 (input) =>
                   `${input.name}: ${
                     input.type.fieldType.type === Options.name
@@ -132,7 +147,7 @@ export const CreateGraphWithInputs = (nodes: ParserField[]) => {
                       ? input.type.fieldType.nest.name
                       : '<UNKNOWN>'
                   }`,
-              )}]->(:${curArg})`;
+              )}]->(:${curArg}Type)`;
             }
             return '';
           })

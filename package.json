@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node ./lib/main.js",
+    "start": "node ./lib/index.js",
     "build": "tsc"
   },
   "author": "Arkadiusz Oskar Kuryło",
@@ -21,6 +21,7 @@
     "typescript": "^4.8.3"
   },
   "dependencies": {
-    "graphql-js-tree": "^1.0.9"
+    "graphql-js-tree": "^1.0.9",
+    "yargs": "^17.7.2"
   }
 }
