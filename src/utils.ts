@@ -78,6 +78,43 @@ const getEnums = (nodes: ParserField[]) => {
   return enums.filter((e): e is GqlEnum => !!e);
 };
 
+const createResolver = (node: ParserField, objectsArray: ParserField[], enumArray: GqlEnum[]) => {
+  let nestedObjects: string[] = [];
+  const prefix = `\n  (${node.name}Type: ${node.name} {`;
+  const nodes = node.args.map((arg) => {
+    const isRequired = arg.type.fieldType.type === Options.required;
+    const isNested = checkIfNodeIsObject(arg, objectsArray);
+    if (
+      arg.type.fieldType.type === Options.required &&
+      arg.type.fieldType.nest.type === Options.name &&
+      !isGqlScalar(arg.type.fieldType.nest.name)
+    ) {
+      nestedObjects.push(
+        `(:${node.name}Type)-[${arg.type.fieldType.nest.name}: ${arg.type.fieldType.nest.name}Type]->(:${arg.type.fieldType.nest.name}Type)`,
+      );
+      return ``;
+    }
+
+    const curArg =
+      arg.type.fieldType.type === Options.name
+        ? convertToEnumOrScalar(arg.type.fieldType, enumArray)
+        : arg.type.fieldType.nest.type === Options.name
+        ? convertScalarsToUpperCase(arg.type.fieldType.nest.name)
+        : arg.type.fieldType.nest.type === Options.array
+        ? convertToArrayScalar(arg.type.fieldType.nest)
+        : (console.error(`NOT HANDLED TYPE (got: ${node})`), '<UNKNOWN>');
+    const dir = arg.directives.length ? convertDirective(arg.directives[0]) : undefined;
+    return `${isRequired ? '' : ' OPTIONAL'} ${isNested ? curArg : arg.name + ' ' + curArg}${!!dir ? dir : ''}`;
+  });
+  const suffix = ` }),`;
+  let result = '';
+  if (!nodes.every((n) => n === '')) {
+    result = prefix + nodes.map((n) => n) + suffix;
+  }
+  result += nestedObjects.map((no) => `\n  ${no}`);
+  return result;
+};
+
 const checkIfNodeIsObject = (obj: ParserField, nodes: ParserField[]) =>
   nodes.some((node) => obj.type.fieldType.type === Options.name && node.id === obj.type.fieldType.name);
 
@@ -91,37 +128,11 @@ export const CreateGraphWithoutInputs = (nodes: ParserField[]) => {
   for (let index = 0; index < nodes.length; index++) {
     let nestedObjects: string[] = [];
     const node = nodes[index];
+    if (node.name === 'schema') continue;
     if (node.type.fieldType.type === Options.name && node.type.fieldType.name === 'enum') continue;
     result += node.args.every((arg) => arg && arg.args && arg.args.length > 0)
       ? ''
-      : `\n  (${node.name}Type: ${node.name}Type {` +
-        node.args.map((arg) => {
-          const isRequired = arg.type.fieldType.type === Options.required;
-          const isNested = checkIfNodeIsObject(arg, objectsArray);
-          if (
-            arg.type.fieldType.type === Options.required &&
-            arg.type.fieldType.nest.type === Options.name &&
-            !isGqlScalar(arg.type.fieldType.nest.name)
-          ) {
-            nestedObjects.push(
-              `(:${node.name}Type)-[${arg.type.fieldType.nest.name}Type: ${arg.type.fieldType.nest.name}]->(:${arg.type.fieldType.nest.name}Type) `,
-            );
-            return ``;
-          }
-
-          const curArg =
-            arg.type.fieldType.type === Options.name
-              ? convertToEnumOrScalar(arg.type.fieldType, enumArray)
-              : arg.type.fieldType.nest.type === Options.name
-              ? convertScalarsToUpperCase(arg.type.fieldType.nest.name)
-              : arg.type.fieldType.nest.type === Options.array
-              ? convertToArrayScalar(arg.type.fieldType.nest)
-              : (console.error(`NOT HANDLED TYPE (got: ${node})`), '<UNKNOWN>');
-          const dir = arg.directives.length ? convertDirective(arg.directives[0]) : undefined;
-          return `${isRequired ? '' : ' OPTIONAL'} ${isNested ? curArg : arg.name + ' ' + curArg}${!!dir ? dir : ''}`;
-        }) +
-        ` }),`;
-    result += nestedObjects.map((no) => `\n  ${no}`);
+      : createResolver(node, objectsArray, enumArray);
   }
   return result;
 };

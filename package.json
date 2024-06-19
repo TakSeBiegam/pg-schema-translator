@@ -5,12 +5,14 @@
   "type": "module",
   "scripts": {
     "start": "node ./lib/index.js",
-    "build": "tsc"
+    "build": "tsc",
+    "test": "node --loader ts-node/esm src/tests/converter.ts"
   },
   "author": "Arkadiusz Oskar Kuryło",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^18.7.18",
+    "@types/yargs": "^17.0.32",
     "@typescript-eslint/eslint-plugin": "^5.38.0",
     "@typescript-eslint/parser": "^5.38.0",
     "eslint": "^8.23.1",

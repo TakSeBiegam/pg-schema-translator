@@ -1,10 +1,13 @@
 CREATE GRAPH TYPE schemaGraphType STRICT { 
-  (PostType: PostType { name STRING, content STRING, createdAt STRING, comments Comment }),
-  (CommentType: CommentType { title STRING, isLiked Likes }),
-  (LikesType: LikesType { Liked BOOLEAN, Loved BOOLEAN }),
-  (QueryType: QueryType { OPTIONAL PublicQuery, OPTIONAL UserQuery }),
-  (PublicQueryType: PublicQueryType { version STRING }),
-  (UserType: UserType { username STRING ^[0-9a-zA-Z]*$, nickname STRING(2137), OPTIONAL sex ENUM("M","F") , friends STRING ARRAY }),
-  (UserQueryType: UserQueryType { me User, getPost Post }),
+  (PostType: Post { name STRING, content STRING, createdAt STRING, }),
+  (:PostType)-[Comment: CommentType]->(:CommentType)
+  (CommentType: Comment { title STRING, }),
+  (:CommentType)-[Likes: LikesType]->(:LikesType)
+  (LikesType: Likes { Liked BOOLEAN, Loved BOOLEAN }),
+  (QueryType: Query { OPTIONAL PublicQuery, OPTIONAL UserQuery }),
+  (PublicQueryType: PublicQuery { version STRING }),
+  (UserType: User { username STRING ^[0-9a-zA-Z]*$, nickname STRING(2137), OPTIONAL sex ENUM("M","F") , friends STRING ARRAY }),
+  (:UserQueryType)-[User: UserType]->(:UserType),
+  (:UserQueryType)-[Post: PostType]->(:PostType)
   (:UserQueryType)-[id: String]->(:PostType)
 }
