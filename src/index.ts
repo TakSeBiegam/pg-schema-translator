@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import { Parser } from 'graphql-js-tree';
-import { welcome } from './cli/welcome.js';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import * as fs from 'fs';
