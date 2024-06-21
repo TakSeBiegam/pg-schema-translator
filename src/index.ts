@@ -17,7 +17,6 @@ function convertGraphqlToPgSchema(inputFile: string) {
         ${e}`);
     throw new Error('not valid schema');
   }
-  console.log(`Konwersja zakończona`);
 }
 
 const { i } = await yargs(hideBin(process.argv))
