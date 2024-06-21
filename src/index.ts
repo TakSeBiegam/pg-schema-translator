@@ -6,12 +6,12 @@ import { hideBin } from 'yargs/helpers';
 import * as fs from 'fs';
 import { convertGraph } from './convert.js';
 
-function convertGraphqlToPgSchema(inputFile: string, outputFile: string) {
-  console.log(`Konwersja ${inputFile} do ${outputFile}`);
+function convertGraphqlToPgSchema(inputFile: string) {
+  console.log(`Konwersja ${inputFile}`);
   try {
     let nodes = Parser.parse(fs.readFileSync(inputFile, 'utf-8')).nodes.filter((node) => node.name !== 'schema');
     const schema = convertGraph('schema', nodes);
-    fs.writeFileSync(outputFile, schema);
+    console.log(schema);
   } catch (e) {
     console.error(`your schema is not valid.
         ${e}`);
@@ -20,20 +20,20 @@ function convertGraphqlToPgSchema(inputFile: string, outputFile: string) {
   console.log(`Konwersja zakończona`);
 }
 
-const { i, o } = await yargs(hideBin(process.argv))
-  .usage('Użycie: $0 -i [plik] -o [plik]')
+const { i } = await yargs(hideBin(process.argv))
+  .usage('Użycie: $0 -i [plik]')
   .option('i', {
     alias: 'input',
     describe: 'Plik źródłowy GraphQL',
     type: 'string',
     demandOption: true,
   })
-  .option('o', {
-    alias: 'output',
-    describe: 'Plik docelowy PG Schema',
-    type: 'string',
-    demandOption: true,
-  })
+  // .option('o', {
+  //   alias: 'output',
+  //   describe: 'Plik docelowy PG Schema',
+  //   type: 'string',
+  //   demandOption: true,
+  // })
   .showHelpOnFail(true)
   .epilog('Bye!').argv;
-convertGraphqlToPgSchema(i, o);
+convertGraphqlToPgSchema(i);
