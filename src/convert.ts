@@ -1,5 +1,5 @@
-import { Parser, ParserField } from 'graphql-js-tree';
-import { CreateGraphWithInputs, CreateGraphWithoutInputs } from './utils.js';
+import { ParserField } from 'graphql-js-tree';
+import { CreateGraphWithInputs, CreateGraphWithoutInputs } from './tools/utils.js';
 
 export const convertGraph = (title: string, nodes: ParserField[]) => {
   return (
