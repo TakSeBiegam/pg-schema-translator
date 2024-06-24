@@ -28,7 +28,7 @@ const handleConstraintDirective = (arg: ParserField) => {
 };
 
 export const convertScalarsToUpperCase = (input: string): string =>
-  GqlScalars.indexOf(input.toUpperCase()) !== -1 ? input.toUpperCase() : input;
+  GqlScalars.indexOf(input.toUpperCase()) !== -1 ? input.toUpperCase() : isUnion(input) ? `${input}Type` : input;
 
 export const convertToEnumOrScalar = (obj: { type: Options.name; name: string }) =>
   checkFieldTypeIsScalar(obj.name)
@@ -46,6 +46,7 @@ export const convertToArrayScalar = (obj: { type: Options.array; nest: FieldType
 };
 
 export const convertToUnionOrScalar = (input: string) => {
+  console.log(input);
   return isUnion(input) ? convertToUnion(input) : convertScalarsToUpperCase(input);
 };
 

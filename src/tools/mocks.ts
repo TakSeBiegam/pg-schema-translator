@@ -1,6 +1,5 @@
 export const MockSchema = {
-  full: `
-type Post {
+  full: `type Post {
   name: String!
   content: String!
   createdAt: String!
@@ -67,16 +66,15 @@ schema {
     schema {
         query: Query
     }`,
-  simple_union: `
-type Query {
+  simple_union: `type Query {
   currentVersion: String!
-  payments: AccountType!
+  payments: Account!
 }
 schema {
   query: Query
 }
 
-union AccountType = Company | Personal
+union Account = Company | Personal
 
 type Company {
   title: String!
@@ -86,6 +84,48 @@ type Company {
 type Personal {
   firstName: String!
   lastName: String!
+}
+`,
+  graphql_union: `type Book {
+  title: String!
+}
+
+union SearchResult = Book | Author
+
+type Author {
+  name: String!
+}
+
+type Query {
+  search(contains: String): [SearchResult]!
+}
+
+schema {
+  query: Query
+}
+`,
+  simple_inheritance: `interface Salaried {
+  salary: Int!
+}
+
+interface Person {
+  name: String!
+  birthday: Date
+}
+
+type employee implements Salaried & Person {
+  salary: Int!
+  name: String!
+  birthday: Date
+  _id: String!
+}
+
+type Query {
+  emp: employee!
+}
+
+schema {
+  query: Query
 }
 `,
 };

@@ -1,12 +1,12 @@
 type Query {
   currentVersion: String!
-  payments: AccountType!
+  payments: Account!
 }
 schema {
   query: Query
 }
 
-union AccountType = Company | Personal
+union Account = Company | Personal
 
 type Company {
   title: String!
