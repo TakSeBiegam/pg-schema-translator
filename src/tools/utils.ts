@@ -35,7 +35,7 @@ const reduceArgumentsWithInterfaces = (args: ParserField[], listOfInterfaces: st
 const createResolver = (node: ParserField) => {
   let nestedObjects: string[] = [];
   let unionEdgeTypes: string[] = [];
-  const prefix = `\n  (${node.name}Type: ${node.name} { `;
+  const prefix = `\n  (${node.name}Type: `;
   let keys: string[] = [];
   let args = node.args;
   if (node.interfaces.length !== 0) {
@@ -53,7 +53,9 @@ const createResolver = (node: ParserField) => {
         isUnion(arg.type.fieldType.nest.name)
       ) {
         unionEdgeTypes.push(
-          `(:${node.name}Type)-[${arg.name}Type: ${arg.name}]->(:${findUnionAndReturn(arg.type.fieldType.nest.name)})`,
+          `(:${node.name}Type)-[${arg.name}Type: ${arg.name}]->(:${findUnionAndReturn(
+            arg.type.fieldType.nest.name,
+          )}Type)`,
         );
         return ``;
       }
@@ -89,6 +91,7 @@ const createResolver = (node: ParserField) => {
   if (!keys.every((n) => n === '')) {
     result =
       prefix +
+      (isUnion(node.name) ? '' : `${node.name} {`) +
       (isUnion(node.name) ? keys.join(' | ') : keys.join(', ')) +
       (node.interfaces.length ? ` } & ${node.interfaces.join(' & ')}` : '') +
       suffix;

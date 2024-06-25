@@ -55,5 +55,5 @@ export const findUnionAndReturn = (input: string) => {
   if (!union) {
     throw new Error('Schema is not valid');
   }
-  return union.fields.map((f) => f + 'Type').join(' | ');
+  return union.name;
 };
