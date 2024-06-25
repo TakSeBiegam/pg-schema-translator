@@ -32,6 +32,9 @@ const reduceArgumentsWithInterfaces = (args: ParserField[], listOfInterfaces: st
   return args.filter((arg) => !interfaceFields.has(arg.name));
 };
 
+const createExclusiveNode = (baseType: string, middleType: string, targetType: string) =>
+  `FOR y WITHIN (:${baseType})-[y:${middleType}]->(:${targetType}) EXCLUSIVE x, z WITHIN (x:${baseType})-[y]->(z:${targetType})`;
+
 const createResolver = (node: ParserField) => {
   let nestedObjects: string[] = [];
   let unionEdgeTypes: string[] = [];
@@ -52,11 +55,13 @@ const createResolver = (node: ParserField) => {
         arg.type.fieldType.nest.type === Options.name &&
         isUnion(arg.type.fieldType.nest.name)
       ) {
-        unionEdgeTypes.push(
-          `(:${node.name}Type)-[${arg.name}Type: ${arg.name}]->(:${findUnionAndReturn(
-            arg.type.fieldType.nest.name,
-          )}Type)`,
-        );
+        if (arg.type)
+          unionEdgeTypes.push(
+            `(:${node.name}Type)-[${arg.name}Type: ${arg.name}]->(:${findUnionAndReturn(
+              arg.type.fieldType.nest.name,
+            )}Type)`,
+          );
+        unionEdgeTypes.push(createExclusiveNode(node.name, arg.name, arg.type.fieldType.nest.name));
         return ``;
       }
       if (
