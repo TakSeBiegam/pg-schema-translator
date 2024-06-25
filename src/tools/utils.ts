@@ -39,75 +39,70 @@ const reduceArgumentsWithInterfaces = (args: ParserField[], listOfInterfaces: st
 const createExclusiveEdgeTypes = (baseType: string, middleType: string, targetType: string) =>
   `FOR y WITHIN (:${baseType}Type)-[y:${middleType}]->(:${targetType}Type) EXCLUSIVE x, z WITHIN (x:${baseType}Type)-[y]->(z:${targetType}Type),`;
 
-const createResolver = (node: ParserField) => {
+const createEdgeType = (baseType: string, middleType: string, targetType: string) =>
+  `(:${baseType}Type)-[${middleType}Type: ${middleType}]->(:${targetType}Type),`;
+
+const createResolver = (node: ParserField): string => {
   const prefix = `\n  (${node.name}Type: `;
-  let keys: string[] = [];
   let args = node.args;
   if (node.interfaces.length !== 0) {
     args = reduceArgumentsWithInterfaces(node.args, node.interfaces);
   }
-  keys = args
+
+  const keys = args
     .map((arg) => {
+      const { type } = arg;
+      const { fieldType } = type;
       const isRequired =
-        arg.type.fieldType.type === Options.required ||
-        (arg.type.fieldType.type === Options.name && isUnionArg(arg.type.fieldType.name));
+        fieldType.type === Options.required || (fieldType.type === Options.name && isUnionArg(fieldType.name));
       const isNested = checkIfNodeIsObject(arg, objectsArray);
-      if (
-        arg.type.fieldType.type === Options.required &&
-        arg.type.fieldType.nest.type === Options.name &&
-        isUnion(arg.type.fieldType.nest.name)
-      ) {
-        if (arg.type)
-          unionEdgeTypes.push(
-            `(:${node.name}Type)-[${arg.name}Type: ${arg.name}]->(:${findUnionAndReturn(
-              arg.type.fieldType.nest.name,
-            )}Type)`,
-          );
-        unionEdgeTypes.push(createExclusiveEdgeTypes(node.name, arg.name, arg.type.fieldType.nest.name));
-        return ``;
+
+      if (fieldType.type === Options.required && fieldType.nest.type === Options.name) {
+        const { nest } = fieldType;
+        if (isUnion(nest.name)) {
+          if (type) {
+            unionEdgeTypes.push(createEdgeType(node.name, arg.name, findUnionAndReturn(nest.name)));
+          }
+          unionEdgeTypes.push(createExclusiveEdgeTypes(node.name, arg.name, nest.name));
+          return '';
+        }
+        if (!isGqlScalar(nest.name) && !isUnion(nest.name)) {
+          nestedObjects.push(createEdgeType(node.name, nest.name, nest.name));
+          return '';
+        }
       }
-      if (
-        arg.type.fieldType.type === Options.required &&
-        arg.type.fieldType.nest.type === Options.name &&
-        !isGqlScalar(arg.type.fieldType.nest.name) &&
-        !isUnion(arg.type.fieldType.nest.name)
-      ) {
-        nestedObjects.push(
-          `(:${node.name}Type)-[${arg.type.fieldType.nest.name}Type: ${arg.type.fieldType.nest.name}]->(:${arg.type.fieldType.nest.name}Type)`,
-        );
-        return ``;
-      }
+
       const curArg =
         arg.data.type === TypeSystemDefinition.UnionMemberDefinition
-          ? arg.name + 'Type'
-          : arg.type.fieldType.type === Options.name
-          ? convertToEnumOrScalar(arg.type.fieldType)
-          : arg.type.fieldType.nest.type === Options.name
-          ? convertToUnionOrScalar(arg.type.fieldType.nest.name)
-          : arg.type.fieldType.nest.type === Options.array
-          ? convertToArrayScalar(arg.type.fieldType.nest)
+          ? `${arg.name}Type`
+          : fieldType.type === Options.name
+          ? convertToEnumOrScalar(fieldType)
+          : fieldType.nest.type === Options.name
+          ? convertToUnionOrScalar(fieldType.nest.name)
+          : fieldType.nest.type === Options.array
+          ? convertToArrayScalar(fieldType.nest)
           : (console.error(`NOT HANDLED TYPE (got: ${node})`), '<UNKNOWN>');
+
       const dir = arg.directives.length ? convertDirective(arg.directives[0]) : undefined;
-      return `${isRequired ? '' : 'OPTIONAL '}${isNested ? curArg : arg.name + ' ' + curArg}${!!dir ? dir : ''}`;
+      return `${isRequired ? '' : 'OPTIONAL '}${isNested ? curArg : `${arg.name} ${curArg}`}${dir ? dir : ''}`;
     })
     .filter(Boolean);
-  let suffix = ` }),`;
-  if (node.interfaces.length !== 0) {
-    suffix = ` ),`;
-  }
-  let result = '';
+
+  const suffix = `),`;
+
   if (!keys.every((n) => n === '') || node.interfaces.length) {
-    result =
-      prefix +
-      (node.interfaces.length ? `${node.interfaces.map((i) => i + `Type`).join(' & ')}` : '') +
-      (keys.length && node.interfaces.length ? ` & ` : ``) +
-      (!keys.every((n) => n === '')
-        ? (isUnion(node.name) ? '' : `${node.name} {`) + (isUnion(node.name) ? keys.join(' | ') : keys.join(', '))
-        : '') +
-      suffix;
+    const interfacesPart = node.interfaces.length ? node.interfaces.map((i) => `${i}Type`).join(' & ') : '';
+    const keysPart = !keys.every((n) => n === '')
+      ? isUnion(node.name)
+        ? keys.join(' | ')
+        : `${node.name} { ${keys.join(', ')} }`
+      : '';
+    const joiner = keys.length && node.interfaces.length ? ` & ` : ``;
+
+    return `${prefix}${interfacesPart}${joiner}${keysPart}${suffix}`;
   }
 
-  return result;
+  return '';
 };
 
 export const CreateGraphWithoutInputs = (nodes: ParserField[]) => {
