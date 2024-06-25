@@ -93,15 +93,17 @@ const createResolver = (node: ParserField) => {
     .filter(Boolean);
   let suffix = ` }),`;
   if (node.interfaces.length !== 0) {
-    suffix = ` )`;
+    suffix = ` ),`;
   }
   let result = '';
-  if (!keys.every((n) => n === '')) {
+  if (!keys.every((n) => n === '') || node.interfaces.length) {
     result =
       prefix +
-      (isUnion(node.name) ? '' : `${node.name} {`) +
-      (isUnion(node.name) ? keys.join(' | ') : keys.join(', ')) +
-      (node.interfaces.length ? ` } & ${node.interfaces.join(' & ')}` : '') +
+      (node.interfaces.length ? `${node.interfaces.map((i) => i + `Type`).join(' & ')}` : '') +
+      (keys.length && node.interfaces.length ? ` & ` : ``) +
+      (!keys.every((n) => n === '')
+        ? (isUnion(node.name) ? '' : `${node.name} {`) + (isUnion(node.name) ? keys.join(' | ') : keys.join(', '))
+        : '') +
       suffix;
   }
 
@@ -153,7 +155,7 @@ export const CreateGraphWithInputs = (nodes: ParserField[]) => {
                       ? input.type.fieldType.nest.name
                       : '<UNKNOWN>'
                   }`,
-              )}]->(:${isRequired ? '' : ' OPTIONAL'}${curArg}Type ${isArray ? 'ARRAY' : ''})`;
+              )}]->(:${isRequired ? '' : ' OPTIONAL'}${curArg}Type ${isArray ? 'ARRAY' : ''}),`;
             }
             return '';
           })
