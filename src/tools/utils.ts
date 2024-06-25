@@ -73,7 +73,7 @@ const createResolver = (node: ParserField) => {
         !isUnion(arg.type.fieldType.nest.name)
       ) {
         nestedObjects.push(
-          `(:${node.name}Type)-[${arg.type.fieldType.nest.name}: ${arg.type.fieldType.nest.name}Type]->(:${arg.type.fieldType.nest.name}Type)`,
+          `(:${node.name}Type)-[${arg.type.fieldType.nest.name}Type: ${arg.type.fieldType.nest.name}]->(:${arg.type.fieldType.nest.name}Type)`,
         );
         return ``;
       }

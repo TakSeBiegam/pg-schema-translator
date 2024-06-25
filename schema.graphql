@@ -1,19 +1,23 @@
-type Query {
-  currentVersion: String!
-  payments: Account!
+interface Salaried {
+  salary: Int!
 }
+
+interface Person {
+  name: String!
+  birthday: Date
+}
+
+type employee implements Salaried & Person {
+  salary: Int!
+  name: String!
+  birthday: Date
+  _id: String!
+}
+
+type Query {
+  emp: employee!
+}
+
 schema {
   query: Query
-}
-
-union Account = Company | Personal
-
-type Company {
-  title: String!
-  NIP: String!
-}
-
-type Personal {
-  firstName: String!
-  lastName: String!
 }
