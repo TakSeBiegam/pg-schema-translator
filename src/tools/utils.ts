@@ -14,12 +14,16 @@ export let enumArray: GqlEnum[] = [];
 export let unionArray: GqlUnion[] = [];
 export let objectsArray: ParserField[] = [];
 export let interfacesArray: GqlInterface[] = [];
+let unionEdgeTypes: string[] = [];
+let nestedObjects: string[] = [];
 
 const cleanUpArrays = () => {
   enumArray = [];
   unionArray = [];
   objectsArray = [];
   interfacesArray = [];
+  unionEdgeTypes = [];
+  nestedObjects = [];
 };
 
 const reduceArgumentsWithInterfaces = (args: ParserField[], listOfInterfaces: string[]) => {
@@ -32,12 +36,10 @@ const reduceArgumentsWithInterfaces = (args: ParserField[], listOfInterfaces: st
   return args.filter((arg) => !interfaceFields.has(arg.name));
 };
 
-const createExclusiveNode = (baseType: string, middleType: string, targetType: string) =>
-  `FOR y WITHIN (:${baseType})-[y:${middleType}]->(:${targetType}) EXCLUSIVE x, z WITHIN (x:${baseType})-[y]->(z:${targetType})`;
+const createExclusiveEdgeTypes = (baseType: string, middleType: string, targetType: string) =>
+  `FOR y WITHIN (:${baseType}Type)-[y:${middleType}]->(:${targetType}Type) EXCLUSIVE x, z WITHIN (x:${baseType}Type)-[y]->(z:${targetType}Type),`;
 
 const createResolver = (node: ParserField) => {
-  let nestedObjects: string[] = [];
-  let unionEdgeTypes: string[] = [];
   const prefix = `\n  (${node.name}Type: `;
   let keys: string[] = [];
   let args = node.args;
@@ -61,7 +63,7 @@ const createResolver = (node: ParserField) => {
               arg.type.fieldType.nest.name,
             )}Type)`,
           );
-        unionEdgeTypes.push(createExclusiveNode(node.name, arg.name, arg.type.fieldType.nest.name));
+        unionEdgeTypes.push(createExclusiveEdgeTypes(node.name, arg.name, arg.type.fieldType.nest.name));
         return ``;
       }
       if (
@@ -102,8 +104,7 @@ const createResolver = (node: ParserField) => {
       (node.interfaces.length ? ` } & ${node.interfaces.join(' & ')}` : '') +
       suffix;
   }
-  result += nestedObjects.map((no) => `\n  ${no}`);
-  result += unionEdgeTypes.map((no) => `\n  ${no}`);
+
   return result;
 };
 
@@ -119,6 +120,8 @@ export const CreateGraphWithoutInputs = (nodes: ParserField[]) => {
     if (node.type.fieldType.type === Options.name && node.type.fieldType.name === 'enum') continue;
     result += node.args.every((arg) => arg && arg.args && arg.args.length > 0) ? '' : createResolver(node);
   }
+  result += nestedObjects.map((no) => `\n  ${no}`);
+  result += unionEdgeTypes.map((no) => `\n  ${no}`);
   cleanUpArrays();
   return result;
 };

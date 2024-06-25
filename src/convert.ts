@@ -2,10 +2,14 @@ import { ParserField } from 'graphql-js-tree';
 import { CreateGraphWithInputs, CreateGraphWithoutInputs } from './tools/utils.js';
 
 export const convertGraph = (title: string, nodes: ParserField[]) => {
-  return (
+  let convertedSchema =
     `CREATE GRAPH TYPE ${title}GraphType STRICT { ` +
     CreateGraphWithoutInputs(nodes) +
     CreateGraphWithInputs(nodes) +
-    `\n}`
-  );
+    `\n}`;
+  const lastCommaIndex = convertedSchema.lastIndexOf(',');
+  if (lastCommaIndex !== -1) {
+    convertedSchema = convertedSchema.slice(0, lastCommaIndex) + convertedSchema.slice(lastCommaIndex + 1);
+  }
+  return convertedSchema;
 };
