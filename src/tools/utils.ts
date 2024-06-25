@@ -1,4 +1,4 @@
-import { Options, ParserField } from 'graphql-js-tree';
+import { Options, ParserField, TypeDefinition, TypeSystemDefinition } from 'graphql-js-tree';
 import { GqlEnum, GqlInterface, GqlUnion } from './types.js';
 import { checkIfNodeIsObject, isGqlScalar, isUnion, isUnionArg } from './checkers.js';
 import { findUnionAndReturn, getEnums, getInterfaces, getObjects, getUnions } from './getters.js';
@@ -70,12 +70,13 @@ const createResolver = (node: ParserField) => {
         );
         return ``;
       }
-
       const curArg =
-        arg.type.fieldType.type === Options.name
+        arg.data.type === TypeSystemDefinition.UnionMemberDefinition
+          ? arg.name + 'Type'
+          : arg.type.fieldType.type === Options.name
           ? convertToEnumOrScalar(arg.type.fieldType)
           : arg.type.fieldType.nest.type === Options.name
-          ? convertScalarsToUpperCase(arg.type.fieldType.nest.name)
+          ? convertToUnionOrScalar(arg.type.fieldType.nest.name)
           : arg.type.fieldType.nest.type === Options.array
           ? convertToArrayScalar(arg.type.fieldType.nest)
           : (console.error(`NOT HANDLED TYPE (got: ${node})`), '<UNKNOWN>');

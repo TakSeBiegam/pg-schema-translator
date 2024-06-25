@@ -46,7 +46,6 @@ export const convertToArrayScalar = (obj: { type: Options.array; nest: FieldType
 };
 
 export const convertToUnionOrScalar = (input: string) => {
-  console.log(input);
   return isUnion(input) ? convertToUnion(input) : convertScalarsToUpperCase(input);
 };
 
