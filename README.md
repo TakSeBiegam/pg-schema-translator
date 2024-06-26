@@ -4,8 +4,6 @@
 
 ### :house: [Homepage](https://github.com/TakSeBiegam/PG-Schema-translator)
 
-## Installation :zap:
-
 ## build project :seedling:
 
 run these commands
@@ -25,6 +23,10 @@ npm run start -- -i <graphql.schema path>
 ```
 
 Now everything should work! Have fun using :smile:
+
+## Examples
+
+in the [/examples](https://github.com/TakSeBiegam/pg-schema-translator/tree/master/examples) directory, you can find sample GraphQL schemas and their corresponding PG-schemas in the [/pg-schema](https://github.com/TakSeBiegam/pg-schema-translator/tree/master/pg-schema) folder.
 
 ## Author
 

@@ -1,0 +1,8 @@
+CREATE GRAPH TYPE schemaGraphType STRICT { 
+  (QueryType: Query { currentVersion STRING }),
+  (AccountType: CompanyType | PersonalType),
+  (CompanyType: Company { title STRING, NIP STRING }),
+  (PersonalType: Personal { firstName STRING, lastName STRING }),
+  (:QueryType)-[paymentsType: payments]->(:AccountType),
+  FOR y WITHIN (:QueryType)-[y:payments]->(:AccountType) EXCLUSIVE x, z WITHIN (x:QueryType)-[y]->(z:AccountType)
+}

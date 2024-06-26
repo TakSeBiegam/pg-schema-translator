@@ -1,0 +1,6 @@
+CREATE GRAPH TYPE schemaGraphType STRICT { 
+  (BookType: Book { title STRING }),
+  (SearchResultType: BookType | AuthorType),
+  (AuthorType: Author { name STRING }),
+  (:QueryType)-[contains: String]->(:SearchResultType ARRAY)
+}

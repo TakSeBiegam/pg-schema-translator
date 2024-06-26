@@ -19,14 +19,27 @@ function convertGraphqlToPgSchema(inputFile: string) {
   }
 }
 
-const { i } = await yargs(hideBin(process.argv))
-  .usage('Użycie: $0 -i [plik]')
-  .option('i', {
-    alias: 'input',
-    describe: 'Plik źródłowy GraphQL',
-    type: 'string',
-    demandOption: true,
-  })
-  .showHelpOnFail(true)
-  .epilog('Bye!').argv;
-convertGraphqlToPgSchema(i);
+yargs(hideBin(process.argv))
+  .usage('Usage: $0 -i [file]')
+  .version(false)
+  .help('h')
+  .alias('h', 'help')
+  .alias('i', 'input')
+  .command(
+    'convert',
+    'Convert your GraphQL schema to PG-schema',
+    (yargs) => {
+      yargs.option('i', {
+        alias: 'input',
+        type: 'string',
+        describe: 'Input file',
+        demandOption: true,
+      });
+    },
+    (argv) => {
+      if (argv.input && typeof argv.input === 'string') {
+        convertGraphqlToPgSchema(argv.input);
+      }
+    },
+  )
+  .demandCommand(1, 'You need at least one command before moving on').argv;

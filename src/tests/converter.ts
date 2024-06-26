@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import test, { describe } from 'node:test';
 import { convertGraph } from '../convert.js';
 import { Parser } from 'graphql-js-tree';
-import { MockSchema } from '../tools/mocks.js';
+// import { MockSchema } from '../tools/mocks.js';
 
 // describe('GraphQL mocks[simple] tests', () => {
 //   const expect = `CREATE GRAPH TYPE MockGraphType STRICT {

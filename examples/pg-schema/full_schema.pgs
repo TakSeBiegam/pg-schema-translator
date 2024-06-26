@@ -1,0 +1,18 @@
+CREATE GRAPH TYPE schemaGraphType STRICT { 
+  (PostType: Post { name STRING, content STRING, createdAt STRING }),
+  (CommentType: Comment { title STRING }),
+  (LikesType: Likes { Liked BOOLEAN, Loved BOOLEAN }),
+  (QueryType: Query { OPTIONAL PublicQuery, OPTIONAL UserQuery }),
+  (PublicQueryType: PublicQuery { version STRING }),
+  (UserType: User { username STRING ^[0-9a-zA-Z]*$, nickname STRING(2137), OPTIONAL sex ENUM("M","F") , friends STRING ARRAY }),
+  (AccountTypeType: CompanyType | PersonalType),
+  (CompanyType: Company { title STRING, NIP STRING }),
+  (PersonalType: Personal { firstName STRING, lastName STRING }),
+  (:PostType)-[CommentType: Comment]->(:CommentType),
+  (:CommentType)-[LikesType: Likes]->(:LikesType),
+  (:UserQueryType)-[UserType: User]->(:UserType),
+  (:UserQueryType)-[PostType: Post]->(:PostType)
+  (:UserType)-[paymentsType: payments]->(:AccountTypeType),
+  FOR y WITHIN (:UserType)-[y:payments]->(:AccountTypeType) EXCLUSIVE x, z WITHIN (x:UserType)-[y]->(z:AccountTypeType),
+  (:UserQueryType)-[id: String]->(:PostType )
+}

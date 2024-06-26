@@ -1,5 +1,5 @@
-export const MockSchema = {
-  full: `type Post {
+const full_schema = `
+type Post {
   name: String!
   content: String!
   createdAt: String!
@@ -58,53 +58,10 @@ enum SEX {
 schema {
   query: Query
 }
-`,
-  simple: `
-    type Query {
-        currentVersion: String!
-    }
-    schema {
-        query: Query
-    }`,
-  simple_union: `type Query {
-  currentVersion: String!
-  payments: Account!
-}
-schema {
-  query: Query
-}
+`;
 
-union Account = Company | Personal
-
-type Company {
-  title: String!
-  NIP: String!
-}
-
-type Personal {
-  firstName: String!
-  lastName: String!
-}
-`,
-  graphql_union: `type Book {
-  title: String!
-}
-
-union SearchResult = Book | Author
-
-type Author {
-  name: String!
-}
-
-type Query {
-  search(contains: String): [SearchResult]!
-}
-
-schema {
-  query: Query
-}
-`,
-  simple_inheritance: `interface Salaried {
+const simple_inheritance = `
+interface Salaried {
   salary: Int!
 }
 
@@ -127,5 +84,56 @@ type Query {
 schema {
   query: Query
 }
-`,
-};
+`;
+
+const simple_union_2 = `
+type Book {
+  title: String!
+}
+
+union SearchResult = Book | Author
+
+type Author {
+  name: String!
+}
+
+type Query {
+  search(contains: String): [SearchResult]!
+}
+
+schema {
+  query: Query
+}
+`;
+const simple_union = `
+type Query {
+  currentVersion: String!
+  payments: Account!
+}
+schema {
+  query: Query
+}
+
+union Account = Company | Personal
+
+type Company {
+  title: String!
+  NIP: String!
+}
+
+type Personal {
+  firstName: String!
+  lastName: String!
+}
+`;
+
+const simple_graphql = `
+type Query {
+  currentVersion: String!
+}
+schema {
+  query: Query
+}
+`;
+
+const GraphQLMocks = { full_schema, simple_graphql, simple_inheritance, simple_union, simple_union_2 };

@@ -1,0 +1,6 @@
+CREATE GRAPH TYPE schemaGraphType STRICT { 
+  (SalariedType: Salaried { salary INT }),
+  (PersonType: Person { name STRING, OPTIONAL birthday Date }),
+  (employeeType: SalariedType & PersonType & employee { _id STRING })
+  (:QueryType)-[employeeType: employee]->(:employeeType)
+}

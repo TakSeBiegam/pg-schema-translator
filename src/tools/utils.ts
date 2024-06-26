@@ -39,8 +39,8 @@ const reduceArgumentsWithInterfaces = (args: ParserField[], listOfInterfaces: st
 const createExclusiveEdgeTypes = (baseType: string, middleType: string, targetType: string) =>
   `FOR y WITHIN (:${baseType}Type)-[y:${middleType}]->(:${targetType}Type) EXCLUSIVE x, z WITHIN (x:${baseType}Type)-[y]->(z:${targetType}Type),`;
 
-const createEdgeType = (baseType: string, middleType: string, targetType: string) =>
-  `(:${baseType}Type)-[${middleType}Type: ${middleType}]->(:${targetType}Type),`;
+const createEdgeType = (baseType: string, middleType: string, targetType: string, addComma?: boolean) =>
+  `(:${baseType}Type)-[${middleType}Type: ${middleType}]->(:${targetType}Type)`;
 
 const createResolver = (node: ParserField): string => {
   const prefix = `\n  (${node.name}Type: `;
@@ -67,7 +67,7 @@ const createResolver = (node: ParserField): string => {
           return '';
         }
         if (!isGqlScalar(nest.name) && !isUnion(nest.name)) {
-          nestedObjects.push(createEdgeType(node.name, nest.name, nest.name));
+          nestedObjects.push(createEdgeType(node.name, nest.name, nest.name, true));
           return '';
         }
       }
