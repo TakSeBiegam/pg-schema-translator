@@ -27,12 +27,6 @@ const { i } = await yargs(hideBin(process.argv))
     type: 'string',
     demandOption: true,
   })
-  // .option('o', {
-  //   alias: 'output',
-  //   describe: 'Plik docelowy PG Schema',
-  //   type: 'string',
-  //   demandOption: true,
-  // })
   .showHelpOnFail(true)
   .epilog('Bye!').argv;
 convertGraphqlToPgSchema(i);
