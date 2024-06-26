@@ -1,0 +1,6 @@
+type Query {
+  currentVersion: String!
+}
+schema {
+  query: Query
+}

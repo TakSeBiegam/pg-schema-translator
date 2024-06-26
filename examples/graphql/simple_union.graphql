@@ -1,0 +1,19 @@
+type Query {
+  currentVersion: String!
+  payments: Account!
+}
+schema {
+  query: Query
+}
+
+union Account = Company | Personal
+
+type Company {
+  title: String!
+  NIP: String!
+}
+
+type Personal {
+  firstName: String!
+  lastName: String!
+}

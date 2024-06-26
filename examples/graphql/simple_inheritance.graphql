@@ -1,0 +1,23 @@
+interface Salaried {
+  salary: Int!
+}
+
+interface Person {
+  name: String!
+  birthday: Date
+}
+
+type employee implements Salaried & Person {
+  salary: Int!
+  name: String!
+  birthday: Date
+  _id: String!
+}
+
+type Query {
+  emp: employee!
+}
+
+schema {
+  query: Query
+}

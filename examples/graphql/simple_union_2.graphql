@@ -1,0 +1,17 @@
+type Book {
+  title: String!
+}
+
+union SearchResult = Book | Author
+
+type Author {
+  name: String!
+}
+
+type Query {
+  search(contains: String): [SearchResult]!
+}
+
+schema {
+  query: Query
+}
