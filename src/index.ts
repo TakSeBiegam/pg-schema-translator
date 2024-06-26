@@ -5,8 +5,10 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import * as fs from 'fs';
 import { convertGraph } from './convert.js';
+import { tableCreator } from './cli/table.js';
+import { printTable } from 'console-table-printer';
 
-function convertGraphqlToPgSchema(inputFile: string) {
+const convertGraphqlToPgSchema = (inputFile: string) => {
   console.log(`Konwersja ${inputFile}`);
   try {
     let nodes = Parser.parse(fs.readFileSync(inputFile, 'utf-8')).nodes.filter((node) => node.name !== 'schema');
@@ -17,7 +19,22 @@ function convertGraphqlToPgSchema(inputFile: string) {
         ${e}`);
     throw new Error('not valid schema');
   }
-}
+};
+
+const mappingFiles = (input: string): string | null => {
+  const mapping: { [key: string]: string } = {
+    graphql: 'graphql',
+    pgschema: 'pgs',
+  };
+  return mapping[input] || null;
+};
+const mappingLanguages = (input: string): string | null => {
+  const mapping: { [key: string]: string } = {
+    pgschema: 'pg-schema',
+    graphql: 'graphql',
+  };
+  return mapping[input] || null;
+};
 
 yargs(hideBin(process.argv))
   .usage('Usage: $0 -i [file]')
@@ -39,6 +56,58 @@ yargs(hideBin(process.argv))
     (argv) => {
       if (argv.input && typeof argv.input === 'string') {
         convertGraphqlToPgSchema(argv.input);
+      }
+    },
+  )
+  .command(
+    'list',
+    'list example schemas',
+    (yargs) => {
+      yargs.positional('type', {
+        describe: 'The type of schema to list',
+        type: 'string',
+        choices: ['graphql', 'pgschema'],
+      });
+    },
+    (argv) => {
+      if (argv._[1] && typeof argv._[1] === 'string') {
+        const schemas = fs.readdirSync(`examples/${mappingLanguages(argv._[1])}`);
+        const table = tableCreator();
+
+        table.addRows(
+          schemas.map((s) => ({
+            path: s,
+            'file name': s.split('.')[0],
+          })),
+        );
+        table.printTable();
+      }
+    },
+  )
+  .command(
+    'show',
+    'show specific generated schema',
+    (yargs) => {
+      yargs.positional('type', {
+        describe: 'The type of schema to list',
+        type: 'string',
+        choices: ['graphql', 'pgschema'],
+      });
+      yargs.option('f', {
+        alias: 'input',
+        type: 'string',
+        describe: 'file name',
+        demandOption: true,
+      });
+    },
+    (argv) => {
+      if (argv._[1] && typeof argv._[1] === 'string' && argv.f && typeof argv.f === 'string') {
+        let schema: Buffer = Buffer.from('');
+        try {
+          schema = fs.readFileSync(`examples/${argv._[1]}/${argv.f}`);
+        } catch (e) {
+          schema = fs.readFileSync(`examples/${argv._[1]}/${argv.f}.${mappingFiles(argv._[1])}`);
+        }
       }
     },
   )
