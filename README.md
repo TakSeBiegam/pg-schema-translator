@@ -1,6 +1,6 @@
 # Welcome to pg-schema translator :book:
 
-> The &#34;pg-schema translators&#34;converter is focused on providing essential tools for handling schema transformation from graphql to pg-schema.
+> The &#34;pg-schema translator&#34; converter is focused on providing essential tools for handling schema transformation from graphql to pg-schema.
 
 ### :house: [Homepage](https://github.com/TakSeBiegam/PG-Schema-translator)
 
@@ -19,7 +19,19 @@ npm run build
 type
 
 ```sh
-npm run start -- -i <graphql.schema path>
+npm run start -- convert -i <graphql.schema path>
+```
+
+list of example schemas
+
+```sh
+npm run start -- list <graphql/pgschema>
+```
+
+show specific schema from examples
+
+```sh
+npm run start -- show <graphql/pgschema> <filename>
 ```
 
 Now everything should work! Have fun using :smile:

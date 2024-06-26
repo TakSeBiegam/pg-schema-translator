@@ -61,7 +61,7 @@ yargs(hideBin(process.argv))
   )
   .command(
     'list',
-    'list example schemas',
+    'List example schemas',
     (yargs) => {
       yargs.positional('type', {
         describe: 'The type of schema to list',
@@ -86,7 +86,7 @@ yargs(hideBin(process.argv))
   )
   .command(
     'show',
-    'show specific generated schema',
+    'Show specific generated schema',
     (yargs) => {
       yargs.positional('type', {
         describe: 'The type of schema to list',
