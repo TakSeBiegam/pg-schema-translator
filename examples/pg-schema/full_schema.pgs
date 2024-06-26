@@ -8,10 +8,10 @@ CREATE GRAPH TYPE schemaGraphType STRICT {
   (AccountTypeType: CompanyType | PersonalType),
   (CompanyType: Company { title STRING, NIP STRING }),
   (PersonalType: Personal { firstName STRING, lastName STRING }),
-  (:PostType)-[CommentType: Comment]->(:CommentType),
-  (:CommentType)-[LikesType: Likes]->(:LikesType),
-  (:UserQueryType)-[UserType: User]->(:UserType),
-  (:UserQueryType)-[PostType: Post]->(:PostType)
+  (:PostType)-[CommentType: comments]->(:CommentType),
+  (:CommentType)-[LikesType: isLiked]->(:LikesType),
+  (:UserQueryType)-[UserType: me]->(:UserType),
+  (:UserQueryType)-[PostType: getPost]->(:PostType)
   (:UserType)-[paymentsType: payments]->(:AccountTypeType),
   FOR y WITHIN (:UserType)-[y:payments]->(:AccountTypeType) EXCLUSIVE x, z WITHIN (x:UserType)-[y]->(z:AccountTypeType),
   (:UserQueryType)-[id: String]->(:PostType )

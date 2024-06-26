@@ -39,8 +39,13 @@ const reduceArgumentsWithInterfaces = (args: ParserField[], listOfInterfaces: st
 const createExclusiveEdgeTypes = (baseType: string, middleType: string, targetType: string) =>
   `FOR y WITHIN (:${baseType}Type)-[y:${middleType}]->(:${targetType}Type) EXCLUSIVE x, z WITHIN (x:${baseType}Type)-[y]->(z:${targetType}Type),`;
 
-const createEdgeType = (baseType: string, middleType: string, targetType: string, addComma?: boolean) =>
-  `(:${baseType}Type)-[${middleType}Type: ${middleType}]->(:${targetType}Type)`;
+const createEdgeType = (
+  baseType: string,
+  middleType: string,
+  middleLabel: string,
+  targetType: string,
+  addComma?: boolean,
+) => `(:${baseType}Type)-[${middleType}Type: ${middleLabel}]->(:${targetType}Type)`;
 
 const createResolver = (node: ParserField): string => {
   const prefix = `\n  (${node.name}Type: `;
@@ -61,13 +66,13 @@ const createResolver = (node: ParserField): string => {
         const { nest } = fieldType;
         if (isUnion(nest.name)) {
           if (type) {
-            unionEdgeTypes.push(createEdgeType(node.name, arg.name, findUnionAndReturn(nest.name)));
+            unionEdgeTypes.push(createEdgeType(node.name, arg.name, arg.name, findUnionAndReturn(nest.name)));
           }
           unionEdgeTypes.push(createExclusiveEdgeTypes(node.name, arg.name, nest.name));
           return '';
         }
         if (!isGqlScalar(nest.name) && !isUnion(nest.name)) {
-          nestedObjects.push(createEdgeType(node.name, nest.name, nest.name, true));
+          nestedObjects.push(createEdgeType(node.name, nest.name, arg.name, nest.name, true));
           return '';
         }
       }
