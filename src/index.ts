@@ -6,7 +6,6 @@ import { hideBin } from 'yargs/helpers';
 import * as fs from 'fs';
 import { convertGraph } from './convert.js';
 import { tableCreator } from './cli/table.js';
-import { printTable } from 'console-table-printer';
 
 const convertGraphqlToPgSchema = (inputFile: string) => {
   console.log(`Konwersja ${inputFile}`);
@@ -25,6 +24,7 @@ const mappingFiles = (input: string): string | null => {
   const mapping: { [key: string]: string } = {
     graphql: 'graphql',
     pgschema: 'pgs',
+    'pg-schema': 'pgs',
   };
   return mapping[input] || null;
 };
@@ -33,15 +33,14 @@ const mappingLanguages = (input: string): string | null => {
     pgschema: 'pg-schema',
     graphql: 'graphql',
   };
-  return mapping[input] || null;
+  return mapping[input] || input;
 };
 
 yargs(hideBin(process.argv))
-  .usage('Usage: $0 -i [file]')
+  .usage('Usage: $0 <command>')
   .version(false)
   .help('h')
   .alias('h', 'help')
-  .alias('i', 'input')
   .command(
     'convert',
     'Convert your GraphQL schema to PG-schema',
@@ -67,6 +66,7 @@ yargs(hideBin(process.argv))
         describe: 'The type of schema to list',
         type: 'string',
         choices: ['graphql', 'pgschema'],
+        demandOption: true,
       });
     },
     (argv) => {
@@ -81,6 +81,9 @@ yargs(hideBin(process.argv))
           })),
         );
         table.printTable();
+      } else {
+        console.log(`correct usage
+> list <graphql/pgschema>`);
       }
     },
   )
@@ -93,21 +96,24 @@ yargs(hideBin(process.argv))
         type: 'string',
         choices: ['graphql', 'pgschema'],
       });
-      yargs.option('f', {
-        alias: 'input',
+      yargs.positional('file', {
         type: 'string',
-        describe: 'file name',
+        describe: 'file name of schema to show',
         demandOption: true,
       });
     },
     (argv) => {
-      if (argv._[1] && typeof argv._[1] === 'string' && argv.f && typeof argv.f === 'string') {
+      if (argv._[1] && typeof argv._[1] === 'string' && argv._[2] && typeof argv._[2] === 'string') {
         let schema: Buffer = Buffer.from('');
         try {
-          schema = fs.readFileSync(`examples/${argv._[1]}/${argv.f}`);
+          schema = fs.readFileSync(`examples/${argv._[1]}/${argv._[2]}`);
         } catch (e) {
-          schema = fs.readFileSync(`examples/${argv._[1]}/${argv.f}.${mappingFiles(argv._[1])}`);
+          schema = fs.readFileSync(`examples/${argv._[1]}/${argv._[2]}.${mappingFiles(argv._[1])}`);
         }
+        console.log(schema.toString());
+      } else {
+        console.log(`correct usage
+> show <graphql/pg-schema> -f <file name>`);
       }
     },
   )
