@@ -64,7 +64,7 @@ const createEdgeType = (
   targetType: string,
   addComma?: boolean
 ) =>
-  `(:${baseType}Type)-[${middleType}Type: ${middleLabel}]->(:${targetType}Type)`;
+  `(:${baseType}Type)-[${middleType}Type: ${middleLabel}]->(:${targetType}Type),`;
 
 const createResolver = (node: ParserField): string => {
   const prefix = `\n  (${node.name}Type: `;
@@ -194,7 +194,7 @@ export const CreateGraphWithInputs = (nodes: ParserField[]) => {
                     arg.type.fieldType.nest.nest.type === Options.name
                   ? arg.type.fieldType.nest.nest.name
                   : "<UNKNOWN>";
-              return `\n  (:${node.name}Type)-[${arg.args.flatMap(
+              return `\n  (:${node.name}Type)-[${arg.args.map(
                 (input) =>
                   `${input.name}: ${
                     input.type.fieldType.type === Options.name
@@ -203,9 +203,9 @@ export const CreateGraphWithInputs = (nodes: ParserField[]) => {
                       ? input.type.fieldType.nest.name
                       : "<UNKNOWN>"
                   }`
-              )}]->(:${isRequired ? "" : " OPTIONAL"}${curArg}Type ${
+              )}]->(:${isRequired ? "" : "OPTIONAL "}${curArg}Type ${
                 isArray ? "ARRAY" : ""
-              }),`;
+              })`;
             }
             return "";
           })

@@ -57,6 +57,9 @@ export default function Home() {
           value={content}
           onChange={(e) => setContent(e)}
           height="90vh"
+          options={{
+            fontSize: 32,
+          }}
           defaultLanguage="graphql"
           defaultValue="type your schema"
         />
@@ -65,7 +68,7 @@ export default function Home() {
           height="90vh"
           defaultLanguage="graphql"
           defaultValue=""
-          options={{ readOnly: true }}
+          options={{ readOnly: true, fontSize: 32 }}
         />
       </div>
       <div style={{ display: "flex", gap: "1rem" }}>
