@@ -11,8 +11,8 @@ type Comment {
 }
 
 type Likes {
-  Liked: Boolean!
-  Loved: Boolean!
+  liked: Boolean!
+  loved: Boolean!
 }
 
 type Query {

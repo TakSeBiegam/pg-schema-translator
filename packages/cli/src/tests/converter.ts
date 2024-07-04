@@ -1,6 +1,5 @@
 import assert from 'node:assert';
 import test, { describe } from 'node:test';
-import { convertGraph } from '../convert.js';
 import { Parser } from 'graphql-js-tree';
 // import { MockSchema } from '../tools/mocks.js';
 

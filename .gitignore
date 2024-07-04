@@ -1,3 +1,4 @@
-.env
-/lib
-/node_modules
+node_modules
+lib
+packages/*/lib
+packages/*/node_modules

@@ -4,8 +4,8 @@ import { Parser } from 'graphql-js-tree';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import * as fs from 'fs';
-import { convertGraph } from './convert.js';
 import { tableCreator } from './cli/table.js';
+import { convertGraph } from '@pg-converter/utils';
 
 const convertGraphqlToPgSchema = (inputFile: string) => {
   console.log(`Konwersja ${inputFile}`);

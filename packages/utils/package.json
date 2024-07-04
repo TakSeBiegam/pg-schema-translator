@@ -1,0 +1,14 @@
+{
+    "name": "@pg-converter/utils",
+    "version": "0.0.1",
+    "description": "",
+    "main": "lib/index.js",
+    "type": "module",
+    "scripts": {
+        "build": "tsc",
+        "lint": "eslint src/**/*.ts src/*.ts"
+    },
+    "dependencies": {
+        "graphql-js-tree": "^2.0.2"
+    }
+}
