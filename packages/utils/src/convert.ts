@@ -11,12 +11,12 @@ export const convertGraph = (title: string, nodes: ParserField[]) => {
     CreateGraphWithoutInputs(nodes) +
     CreateGraphWithInputs(nodes) +
     `\n}`;
-  // const lastCommaIndex = convertedSchema.lastIndexOf("");
-  // if (lastCommaIndex !== -1) {
-  //   convertedSchema = doubleCommaRemover(
-  //     convertedSchema.slice(0, lastCommaIndex) +
-  //       convertedSchema.slice(lastCommaIndex + 1)
-  //   );
-  // }
+  const lastCommaIndex = convertedSchema.lastIndexOf(",");
+  if (lastCommaIndex !== -1) {
+    convertedSchema = doubleCommaRemover(
+      convertedSchema.slice(0, lastCommaIndex) +
+        convertedSchema.slice(lastCommaIndex + 1)
+    );
+  }
   return convertedSchema;
 };

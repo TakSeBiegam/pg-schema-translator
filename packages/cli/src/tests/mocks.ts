@@ -12,8 +12,8 @@ type Comment {
 }
 
 type Likes {
-  Liked: Boolean!
-  Loved: Boolean!
+  liked: Boolean!
+  loved: Boolean!
 }
 
 type Query {
@@ -136,4 +136,4 @@ schema {
 }
 `;
 
-const GraphQLMocks = { full_schema, simple_graphql, simple_inheritance, simple_union, simple_union_2 };
+export const GraphQLMocks = { full_schema, simple_graphql, simple_inheritance, simple_union, simple_union_2 };

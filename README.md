@@ -39,7 +39,7 @@ Now everything should work! Have fun using :smile:
 ## Usage GUI 🏗️
 
 ```sh
-npm run start -w packages/gui
+npm run dev -w packages/gui
 ```
 
 ## Examples
