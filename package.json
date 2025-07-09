@@ -2,8 +2,8 @@
   "name": "pg-schema",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
-    "react-toastify": "^10.0.5"
+  "scripts": {
+    "start": ""
   },
   "devDependencies": {
     "@types/node": "^20",

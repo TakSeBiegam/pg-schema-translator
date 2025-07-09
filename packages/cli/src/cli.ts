@@ -10,6 +10,7 @@ import { convertGraph } from '@pg-converter/utils';
 const convertGraphqlToPgSchema = (inputFile: string) => {
   console.log(`Konwersja ${inputFile}`);
   try {
+    console.log(fs.readdirSync(inputFile));
     const nodes = Parser.parse(fs.readFileSync(inputFile, 'utf-8')).nodes.filter((node) => node.name !== 'schema');
     const schema = convertGraph('schema', nodes);
     console.log(schema);
@@ -49,11 +50,13 @@ yargs(hideBin(process.argv))
         alias: 'input',
         type: 'string',
         describe: 'Input file',
-        demandOption: true,
       });
     },
     (argv) => {
-      if (argv.input && typeof argv.input === 'string') {
+      if (!argv.input || typeof argv.input !== 'string') {
+        console.log(`correct usage
+> convert -i <file name>`);
+      } else {
         convertGraphqlToPgSchema(argv.input);
       }
     },

@@ -49,12 +49,18 @@ yargs(hideBin(process.argv))
         alias: 'input',
         type: 'string',
         describe: 'Input file',
-        demandOption: true,
       });
     },
     (argv) => {
-      if (argv.input && typeof argv.input === 'string') {
-        convertGraphqlToPgSchema(argv.input);
+      if (!argv._[1] || typeof argv._[1] !== 'string') {
+        console.log(`correct usage
+> convert -i <file name>`);
+      } else {
+        try {
+          convertGraphqlToPgSchema(argv._[1]);
+        } catch (e) {
+          console.error('schema cannot be converted, check schema syntax', e);
+        }
       }
     },
   )

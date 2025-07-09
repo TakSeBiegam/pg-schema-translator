@@ -1,4 +1,9 @@
-import { Options, ParserField, TypeSystemDefinition } from "graphql-js-tree";
+import {
+  FieldType,
+  Options,
+  ParserField,
+  TypeSystemDefinition,
+} from "graphql-js-tree";
 import { GqlEnum, GqlInterface, GqlUnion } from "./types.js";
 import {
   checkIfNodeIsObject,
@@ -16,9 +21,7 @@ import {
 import {
   convertDirective,
   convertScalarsToUpperCase,
-  convertToArrayScalar,
   convertToEnumOrScalar,
-  convertToUnionOrScalar,
 } from "./converters.js";
 
 export let enumArray: GqlEnum[] = [];
@@ -36,6 +39,24 @@ const cleanUpArrays = () => {
   unionEdgeTypes = [];
   nestedObjects = [];
 };
+
+function unwrapToNameType(
+  fieldType: FieldType
+): { type: Options.name; name: string } | null {
+  let current = fieldType;
+  while (true) {
+    if (current.type === Options.name) {
+      return current;
+    } else if (
+      current.type === Options.required ||
+      current.type === Options.array
+    ) {
+      current = current.nest;
+    } else {
+      return null;
+    }
+  }
+}
 
 const reduceArgumentsWithInterfaces = (
   args: ParserField[],
@@ -55,7 +76,7 @@ const createExclusiveEdgeTypes = (
   middleType: string,
   targetType: string
 ) =>
-  `FOR y WITHIN (:${baseType}Type)-[y:${middleType}]->(:${targetType}Type) EXCLUSIVE x, z WITHIN (x:${baseType}Type)-[y]->(z:${targetType}Type),`;
+  `FOR y WITHIN (:${baseType})-[y:${middleType}]->(:${targetType}) EXCLUSIVE x, z WITHIN (x:${baseType})-[y]->(z:${targetType}),`;
 
 const createEdgeType = (
   baseType: string,
@@ -63,8 +84,7 @@ const createEdgeType = (
   middleLabel: string,
   targetType: string,
   addComma?: boolean
-) =>
-  `(:${baseType}Type)-[${middleType}Type: ${middleLabel}]->(:${targetType}Type),`;
+) => `(:${baseType})-[${middleType}: ${middleLabel}]->(:${targetType}),`;
 
 const createResolver = (node: ParserField): string => {
   const prefix = `\n  (${node.name}Type: `;
@@ -111,22 +131,22 @@ const createResolver = (node: ParserField): string => {
         }
       }
 
+      const unwrapped = unwrapToNameType(fieldType);
       const curArg =
         arg.data.type === TypeSystemDefinition.UnionMemberDefinition
-          ? `${arg.name}Type`
-          : fieldType.type === Options.name
-          ? convertToEnumOrScalar(fieldType)
-          : fieldType.nest.type === Options.name
-          ? convertToUnionOrScalar(fieldType.nest.name)
-          : fieldType.nest.type === Options.array
-          ? convertToArrayScalar(fieldType.nest)
+          ? `${arg.name}`
+          : unwrapped
+          ? convertToEnumOrScalar(unwrapped)
           : (console.error(`NOT HANDLED TYPE (got: ${node})`), "<UNKNOWN>");
-
       const dir = arg.directives.length
         ? convertDirective(arg.directives[0])
         : undefined;
+      const isArray =
+        arg.type.fieldType.type === Options.array ||
+        (arg.type.fieldType.type === Options.required &&
+          arg.type.fieldType.nest.type === Options.array);
       return `${isRequired ? "" : "OPTIONAL "}${
-        isNested ? curArg : `${arg.name} ${curArg}`
+        isNested ? curArg : `${arg.name} ${curArg} ${isArray ? "ARRAY" : ""}`
       }${dir ? dir : ""}`;
     })
     .filter(Boolean);
@@ -135,7 +155,7 @@ const createResolver = (node: ParserField): string => {
 
   if (!keys.every((n) => n === "") || node.interfaces.length) {
     const interfacesPart = node.interfaces.length
-      ? node.interfaces.map((i) => `${i}Type`).join(" & ")
+      ? node.interfaces.map((i) => `${i}`).join(" & ")
       : "";
     const keysPart = !keys.every((n) => n === "")
       ? isUnion(node.name)
@@ -185,33 +205,28 @@ export const CreateGraphWithInputs = (nodes: ParserField[]) => {
                 arg.type.fieldType.type === Options.array ||
                 (arg.type.fieldType.type === Options.required &&
                   arg.type.fieldType.nest.type === Options.array);
-              const curArg =
-                arg.type.fieldType.type === Options.name
-                  ? convertScalarsToUpperCase(arg.type.fieldType.name)
-                  : arg.type.fieldType.nest.type === Options.name
-                  ? convertToUnionOrScalar(arg.type.fieldType.nest.name)
-                  : arg.type.fieldType.nest.type === Options.array &&
-                    arg.type.fieldType.nest.nest.type === Options.name
-                  ? arg.type.fieldType.nest.nest.name
-                  : "<UNKNOWN>";
-              return `\n  (:${node.name}Type)-[${arg.args.map(
-                (input) =>
-                  `${input.name}: ${
-                    input.type.fieldType.type === Options.name
-                      ? input.type.fieldType.name
-                      : input.type.fieldType.nest.type === Options.name
-                      ? input.type.fieldType.nest.name
-                      : "<UNKNOWN>"
-                  }`
-              )}]->(:${isRequired ? "" : "OPTIONAL "}${curArg}Type ${
-                isArray ? "ARRAY" : ""
-              })`;
+              const unwrapped = unwrapToNameType(arg.type.fieldType);
+              const curArg = unwrapped
+                ? convertScalarsToUpperCase(unwrapped.name)
+                : "<UNKNOWN>";
+
+              return `\n  (:${node.name})-[${arg.args
+                .map((input) => {
+                  const inputUnwrapped = unwrapToNameType(input.type.fieldType);
+                  const inputTypeStr = inputUnwrapped
+                    ? inputUnwrapped.name
+                    : "<UNKNOWN>";
+                  return `${input.name}: ${inputTypeStr}`;
+                })
+                .join(", ")}]->(:${
+                isRequired ? "" : "OPTIONAL "
+              }${curArg}Type ${isArray ? "ARRAY" : ""})`;
             }
             return "";
           })
           .filter(Boolean)
-      : ""
+      : []
   );
   cleanUpArrays();
-  return result;
+  return result.join("");
 };
